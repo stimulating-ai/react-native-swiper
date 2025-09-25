@@ -528,27 +528,16 @@ export default class extends Component {
   scrollBy = (index, animated = true) => {
     if (this.internals.isScrolling || this.state.total < 2) return
     const state = this.state
-
-    // Calculate target index
-    const targetIndex = this.state.index + index
-
-    // Use the same positioning logic as onLayout to ensure consistency
-    let setup = targetIndex
-    if (this.props.loop) {
-      setup++
-    }
-
+    const diff = (this.props.loop ? 1 : 0) + index + this.state.index
     let x = 0
     let y = 0
-    if (state.dir === 'x') x = setup * state.width
-    if (state.dir === 'y') y = setup * state.height
+    if (state.dir === 'x') x = diff * state.width
+    if (state.dir === 'y') y = diff * state.height
 
     this.scrollView && this.scrollView.scrollTo({ x, y, animated })
 
-    // update scroll state and internals offset to match new position
+    // update scroll state
     this.internals.isScrolling = true
-    if (!this.internals.offset) this.internals.offset = {}
-    this.internals.offset[state.dir] = state.dir === 'x' ? x : y
     this.setState({
       autoplayEnd: false
     })
@@ -558,7 +547,7 @@ export default class extends Component {
       setImmediate(() => {
         this.onScrollEnd({
           nativeEvent: {
-            position: setup
+            position: diff
           }
         })
       })
@@ -589,10 +578,8 @@ export default class extends Component {
 
     this.scrollView && this.scrollView.scrollTo({ x, y, animated })
 
-    // update scroll state and internals offset to match new position
+    // update scroll state
     this.internals.isScrolling = true
-    if (!this.internals.offset) this.internals.offset = {}
-    this.internals.offset[state.dir] = state.dir === 'x' ? x : y
     this.setState({
       autoplayEnd: false
     })
